@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#087f7a">
+  <title>The Final Bell Protocol | BASIS Chandler</title>
+  <style>
+    :root {
+      --teal: #087f7a;
+      --teal-dark: #064e4b;
+      --teal-light: #42d6c8;
+      --gold: #ffd166;
+      --red: #ef476f;
+      --ink: #ecfffd;
+      --muted: #a7d7d2;
+      --panel: rgba(6, 46, 45, .9);
+      --line: rgba(92, 225, 213, .26);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: #031c1b; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(239, 71, 111, .15), transparent 27rem),
+        radial-gradient(circle at 85% 20%, rgba(66, 214, 200, .18), transparent 25rem),
+        linear-gradient(150deg, #021413 0%, #073d3a 52%, #031c1b 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .16;
+      background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 90%);
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(900px, calc(100% - 28px)); margin: 0 auto; padding: 20px 0 32px; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .crest {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(8,127,122,.24);
+      font-size: 25px;
+      box-shadow: inset 0 0 18px rgba(66,214,200,.08);
+    }
+    .brand strong { display: block; letter-spacing: .06em; }
+    .brand small { color: var(--muted); }
+    .event-tag {
+      padding: 8px 12px;
+      border: 1px solid rgba(255,209,102,.45);
+      border-radius: 999px;
+      color: var(--gold);
+      background: rgba(255,209,102,.08);
+      font-size: .82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .panel {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: clamp(22px, 5vw, 44px);
+      background: var(--panel);
+      box-shadow: 0 24px 80px rgba(0,0,0,.34), inset 0 1px rgba(255,255,255,.04);
+      backdrop-filter: blur(14px);
+      overflow: hidden;
+    }
+    .panel::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      right: -120px;
+      top: -120px;
+      border: 1px solid rgba(66,214,200,.14);
+      border-radius: 50%;
+      box-shadow: 0 0 0 28px rgba(66,214,200,.025), 0 0 0 58px rgba(66,214,200,.02);
+      pointer-events: none;
+    }
+    .eyebrow { color: var(--teal-light); font-size: .8rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+    h1, h2 { margin: 10px 0 14px; line-height: 1.06; }
+    h1 { font-size: clamp(2.4rem, 8vw, 5.2rem); letter-spacing: -.055em; max-width: 760px; }
+    h2 { font-size: clamp(1.75rem, 5vw, 3rem); letter-spacing: -.035em; }
+    p { color: #d2efec; line-height: 1.68; }
+    .lead { font-size: clamp(1.03rem, 2vw, 1.22rem); max-width: 720px; }
+    .alert {
+      margin: 22px 0;
+      padding: 14px 16px;
+      border-left: 4px solid var(--red);
+      border-radius: 4px 14px 14px 4px;
+      background: rgba(239,71,111,.09);
+      color: #ffdce4;
+      font-weight: 700;
+    }
+
+    .choice-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 26px; }
+    .choice {
+      min-height: 124px;
+      padding: 20px;
+      color: var(--ink);
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(8,127,122,.16);
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .choice:hover, .choice:focus-visible { transform: translateY(-3px); border-color: var(--teal-light); background: rgba(8,127,122,.3); outline: none; }
+    .choice strong { display: block; margin-bottom: 8px; font-size: 1.25rem; }
+    .choice span { color: var(--muted); line-height: 1.4; }
+
+    .game-head { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: end; margin-bottom: 16px; }
+    .status { display: flex; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: .9rem; font-weight: 800; }
+    .chip { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: rgba(0,0,0,.16); }
+    .timer { color: var(--gold); font-variant-numeric: tabular-nums; }
+    .progress { height: 8px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; margin-bottom: 28px; }
+    .progress > div { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--teal-light), var(--gold)); transition: width .35s ease; }
+
+    .teacher-card { display: flex; gap: 16px; align-items: center; margin: 4px 0 20px; }
+    .teacher-icon {
+      flex: 0 0 auto;
+      width: 60px;
+      height: 60px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(66,214,200,.25), rgba(255,209,102,.13));
+      border: 1px solid var(--line);
+      font-size: 28px;
+    }
+    .teacher-card strong { display: block; font-size: 1.2rem; }
+    .teacher-card span { color: var(--muted); }
+    .question { font-size: 1.08rem; }
+    .clue-box {
+      margin: 18px 0;
+      padding: 18px;
+      border: 1px dashed rgba(66,214,200,.45);
+      border-radius: 16px;
+      background: rgba(0,0,0,.16);
+      color: #f1fffd;
+      line-height: 1.65;
+      text-align: center;
+      font-weight: 800;
+    }
+    .answer-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 22px; }
+    input {
+      min-width: 0;
+      padding: 14px 16px;
+      border: 1px solid rgba(66,214,200,.35);
+      border-radius: 13px;
+      color: var(--ink);
+      background: rgba(0,0,0,.28);
+      outline: none;
+    }
+    input:focus { border-color: var(--teal-light); box-shadow: 0 0 0 3px rgba(66,214,200,.11); }
+    .primary, .secondary, .ghost {
+      min-height: 48px;
+      padding: 12px 18px;
+      border-radius: 13px;
+      font-weight: 900;
+    }
+    .primary { border: 0; color: #042421; background: linear-gradient(135deg, var(--teal-light), #8ef0e7); }
+    .secondary { border: 1px solid rgba(255,209,102,.42); color: var(--gold); background: rgba(255,209,102,.08); }
+    .ghost { border: 1px solid var(--line); color: var(--muted); background: transparent; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .feedback { min-height: 28px; margin-top: 12px; font-weight: 800; }
+    .feedback.bad { color: #ff9db2; }
+    .feedback.good { color: #8ef0e7; }
+    .hint { display: none; margin-top: 12px; padding: 13px 15px; border-radius: 13px; background: rgba(255,209,102,.08); color: #ffe8aa; line-height: 1.5; }
+    .hint.show { display: block; }
+
+    .code-slots { display: flex; gap: 10px; justify-content: center; margin: 22px 0; }
+    .code-slot { width: 58px; height: 68px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 14px; background: rgba(0,0,0,.2); color: var(--gold); font-size: 1.8rem; font-weight: 950; }
+    .victory { text-align: center; }
+    .victory-mark { font-size: 4.5rem; filter: drop-shadow(0 12px 25px rgba(255,209,102,.25)); }
+    .lanterns { color: var(--gold); letter-spacing: .45rem; font-size: 1.5rem; }
+    .hidden { display: none !important; }
+    .shake { animation: shake .34s ease; }
+    @keyframes shake { 25% { transform: translateX(-7px); } 50% { transform: translateX(7px); } 75% { transform: translateX(-4px); } }
+
+    footer { margin-top: 16px; color: rgba(167,215,210,.7); text-align: center; font-size: .78rem; }
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 18px, 900px); padding-top: 10px; }
+      .topbar { align-items: flex-start; }
+      .event-tag { max-width: 145px; text-align: center; }
+      .panel { border-radius: 19px; padding: 22px 17px; }
+      .choice-grid { grid-template-columns: 1fr; }
+      .game-head { grid-template-columns: 1fr; align-items: start; }
+      .answer-row { grid-template-columns: 1fr; }
+      .answer-row .primary { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="crest" aria-label="Bobcat mascot placeholder">🐾</div>
+        <div><strong>BASIS CHANDLER</strong><small>Bobcat Mission Control</small></div>
+      </div>
+      <div class="event-tag">🏮 Asian Night Market</div>
+    </header>
+
+    <section id="startScreen" class="panel">
+      <div class="eyebrow">Emergency transmission · 20:14</div>
+      <h1>The Final Bell Protocol</h1>
+      <p class="lead">Asian Night Market is in full swing when the lights flicker. The announcement system crackles—and a strange voice reports that a digital glitch has seized the school’s event controls.</p>
+      <div class="alert">⚠ NIGHT MODE begins in six minutes. Three faculty terminals hold the override code.</div>
+      <p>The glitch has scattered clues across the MPR, Gym, Band Room, and Courtyard. Enter each virtual classroom, solve the teacher’s challenge, and recover the three code digits. The system may try to mislead you.</p>
+      <p><strong>Choose your mission:</strong></p>
+      <div class="choice-grid">
+        <button class="choice" data-level="easy"><strong>Easy</strong><span>Middle school mission · clear clues and quick hints</span></button>
+        <button class="choice" data-level="hard"><strong>Hard</strong><span>High school mission · tougher teacher clues</span></button>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="panel hidden" aria-live="polite">
+      <div class="game-head">
+        <div>
+          <div class="eyebrow" id="missionLabel">Mission</div>
+          <h2 id="stageTitle">Faculty Terminal</h2>
+        </div>
+        <div class="status">
+          <span class="chip" id="progressText">Lock 1 of 4</span>
+          <span class="chip timer" id="timer">06:00</span>
+        </div>
+      </div>
+      <div class="progress"><div id="progressBar"></div></div>
+      <div id="puzzleArea"></div>
+      <div class="actions">
+        <button id="restartBtn" class="ghost" type="button">Restart mission</button>
+      </div>
+    </section>
+
+    <section id="victoryScreen" class="panel victory hidden">
+      <div class="lanterns">🏮 🏮 🏮</div>
+      <div class="victory-mark">🐾</div>
+      <div class="eyebrow">Override accepted</div>
+      <h2>Exit Unlocked!</h2>
+      <p class="lead" style="margin-inline:auto">The Final Bell Protocol has been stopped. The lights return, the Night Market music starts again, and the Bobcat network is secure.</p>
+      <div class="alert" style="border-left:0;border-top:4px solid var(--gold)">MISSION COMPLETE · BASIS CHANDLER</div>
+      <button id="playAgainBtn" class="primary" type="button">Start next team</button>
+    </section>
+
+    <footer>Designed for the BASIS Chandler Asian Night Market · No answers or personal information are saved.</footer>
+  </main>
+
+  <script>
+    const missions = {
+      easy: [
+        {
+          teacher: "Ms. Gass",
+          role: "Linguistics Terminal",
+          icon: "🔤",
+          title: "Room 1",
+          question: "What does Ms. Gass reward her students with?",
+          answers: ["jolly ranchers", "jolly rancher", "jolly rancher candy", "jolly rancher candies"],
+          success: "Room 1 unlocked. You recovered code digit 4.",
+          digit: "4"
+        },
+        {
+          teacher: "Ms. Alessi",
+          role: "Chemistry Terminal",
+          icon: "🧶",
+          title: "Room 2",
+          question: "What game does Ms. Alessi like to play with her students?",
+          answers: ["gimkit", "gim kit"],
+          success: "Room 2 unlocked. You recovered code digit 2.",
+          digit: "2"
+        },
+        {
+          teacher: "Ms. A",
+          role: "Biology Terminal",
+          icon: "🧬",
+          title: "Room 3",
+          question: "What club does Ms. A run?",
+          answers: ["shes the first", "she's the first", "she is the first", "girls rising", "girl rising"],
+          success: "Room 3 unlocked. You recovered code digit 7.",
+          digit: "7"
+        }
+      ],
+      hard: [
+        {
+          teacher: "Ms. Jay",
+          role: "AP Calculus Terminal",
+          icon: "➗",
+          title: "Room 1",
+          question: "What club does Ms. Jay run?",
+          answers: ["red cross", "redcross", "the red cross", "red cross club"],
+          success: "Room 1 unlocked. You recovered code digit 6.",
+          digit: "6"
+        },
+        {
+          teacher: "Ms. Raj",
+          role: "AP Chemistry Kitchen",
+          icon: "🧪",
+          title: "Room 2",
+          question: "Who is the science teacher who does cooking?",
+          answers: ["raj", "ms raj", "ms. raj", "miss raj"],
+          success: "Room 2 unlocked. You recovered code digit 1.",
+          digit: "1"
+        },
+        {
+          teacher: "Mr. Rodgers",
+          role: "Honors Literature Archive",
+          icon: "📚",
+          title: "Room 3",
+          question: "What book are Mr. Rodgers’ students currently reading?",
+          answers: ["odyssey", "the odyssey"],
+          success: "Room 3 unlocked. You recovered code digit 9.",
+          digit: "9"
+        }
+      ]
+    };
+
+    const startScreen = document.querySelector('#startScreen');
+    const gameScreen = document.querySelector('#gameScreen');
+    const victoryScreen = document.querySelector('#victoryScreen');
+    const puzzleArea = document.querySelector('#puzzleArea');
+    const missionLabel = document.querySelector('#missionLabel');
+    const stageTitle = document.querySelector('#stageTitle');
+    const progressText = document.querySelector('#progressText');
+    const progressBar = document.querySelector('#progressBar');
+    const timerEl = document.querySelector('#timer');
+
+    let level = 'easy';
+    let step = 0;
+    let digits = [];
+    let seconds = 360;
+    let timerId = null;
+
+    function normalize(value) {
+      return value.trim().toLowerCase().replace(/[.!?]/g, '').replace(/\s+/g, ' ');
+    }
+
+    function startMission(selectedLevel) {
+      level = selectedLevel;
+      step = 0;
+      digits = [];
+      seconds = 360;
+      clearInterval(timerId);
+      timerId = setInterval(tick, 1000);
+      startScreen.classList.add('hidden');
+      victoryScreen.classList.add('hidden');
+      gameScreen.classList.remove('hidden');
+      renderPuzzle();
+      tick(true);
+    }
+
+    function tick(initial = false) {
+      if (!initial && seconds > 0) seconds--;
+      const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      timerEl.textContent = `${mins}:${secs}`;
+      if (seconds === 0) {
+        timerEl.textContent = 'GLITCH!';
+        timerEl.title = 'Time expired, but you may continue the mission.';
+        clearInterval(timerId);
+      }
+    }
+
+    function renderPuzzle() {
+      const puzzles = missions[level];
+      progressText.textContent = `Lock ${step + 1} of 4`;
+      progressBar.style.width = `${step * 25}%`;
+      missionLabel.textContent = `${level === 'easy' ? 'Easy' : 'Hard'} mission · terminal ${step + 1}`;
+
+      if (step >= puzzles.length) {
+        renderFinalCode();
+        return;
+      }
+
+      const puzzle = puzzles[step];
+      stageTitle.textContent = puzzle.title;
+      puzzleArea.innerHTML = `
+        <div class="teacher-card">
+          <div class="teacher-icon">${puzzle.icon}</div>
+          <div><strong>Room ${step + 1}</strong><span>Faculty clue · identity protected</span></div>
+        </div>
+        <p class="question">${puzzle.question}</p>
+        <form id="answerForm" autocomplete="off">
+          <div class="answer-row">
+            <input id="answerInput" aria-label="Your answer" placeholder="Enter your answer" required>
+            <button class="primary" type="submit">Unlock</button>
+          </div>
+          <div id="feedback" class="feedback" role="status"></div>
+        </form>`;
+      document.querySelector('#answerForm').addEventListener('submit', checkAnswer);
+      document.querySelector('#answerInput').focus();
+    }
+
+    function checkAnswer(event) {
+      event.preventDefault();
+      const puzzle = missions[level][step];
+      const input = document.querySelector('#answerInput');
+      const feedback = document.querySelector('#feedback');
+      const answer = normalize(input.value);
+      const correct = puzzle.answers.some(item => normalize(item) === answer);
+
+      if (!correct) {
+        feedback.textContent = 'That answer is incorrect. Try again.';
+        feedback.className = 'feedback bad';
+        input.classList.remove('shake');
+        void input.offsetWidth;
+        input.classList.add('shake');
+        input.select();
+        return;
+      }
+
+      digits.push(puzzle.digit);
+      feedback.textContent = puzzle.success;
+      feedback.className = 'feedback good';
+      input.disabled = true;
+      event.submitter.disabled = true;
+      setTimeout(() => { step++; renderPuzzle(); }, 1150);
+    }
+
+    function renderFinalCode() {
+      const code = digits.join('');
+      stageTitle.textContent = 'Final Lock: Night Mode Override';
+      missionLabel.textContent = `${level === 'easy' ? 'Easy' : 'Hard'} mission · final code`;
+      progressText.textContent = 'Lock 4 of 4';
+      progressBar.style.width = '75%';
+      puzzleArea.innerHTML = `
+        <p class="question">All faculty terminals are clear. The exit control asks for the three digits in the order you recovered them.</p>
+        <div class="code-slots">${digits.map(d => `<div class="code-slot">${d}</div>`).join('')}</div>
+        <form id="answerForm" autocomplete="off">
+          <div class="answer-row">
+            <input id="answerInput" inputmode="numeric" aria-label="Final three-digit code" maxlength="3" placeholder="Three-digit code" required>
+            <button class="primary" type="submit">Override</button>
+          </div>
+          <div id="feedback" class="feedback" role="status"></div>
+        </form>`;
+      document.querySelector('#answerForm').addEventListener('submit', event => {
+        event.preventDefault();
+        const input = document.querySelector('#answerInput');
+        if (normalize(input.value) === code) {
+          clearInterval(timerId);
+          progressBar.style.width = '100%';
+          setTimeout(showVictory, 350);
+        } else {
+          const feedback = document.querySelector('#feedback');
+          feedback.textContent = 'Code rejected. Keep the digits in the order you earned them.';
+          feedback.className = 'feedback bad';
+          input.select();
+        }
+      });
+      document.querySelector('#answerInput').focus();
+    }
+
+    function showVictory() {
+      gameScreen.classList.add('hidden');
+      victoryScreen.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetGame() {
+      clearInterval(timerId);
+      gameScreen.classList.add('hidden');
+      victoryScreen.classList.add('hidden');
+      startScreen.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.querySelectorAll('[data-level]').forEach(button => button.addEventListener('click', () => startMission(button.dataset.level)));
+    document.querySelector('#restartBtn').addEventListener('click', resetGame);
+    document.querySelector('#playAgainBtn').addEventListener('click', resetGame);
+  </script>
+</body>
+</html>
